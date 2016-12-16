@@ -3,23 +3,69 @@
   "contentVersion": "1.0.0.0",
   "parameters": 
   {
-      
+        "adminPassword":
+            {
+            "type": "securestring",
+            "metadata":
+                {
+                "description": "The password for the administrator account of the new VM and domain"
+                }
+            }      
   },
   "resources": 
-  [{
+  [
+        {
+        "type": "Microsoft.Storage/storageAccounts",
+        "name": "storage-arm-sa",
+        "apiVersion": "2016-01-01",
+        "location": "[resourceGroup().location]",
+        "sku": 
+            {
+            "name": "Standard_LRS"
+            },
+        "kind": "Storage",
+        "properties": 
+            {
+                
+            }
+        },
+        {
+       "type": "Microsoft.Network/publicIPAddresses",
+       "name": "ARMDC01-pip",
+       "apiVersion": "2016-03-30",
+       "location": "[resourceGroup().location]",
+       "properties": 
+            {
+                "publicIPAllocationMethod": "Dynamic"
+            }
+        },
+        {
         "type": "Microsoft.Compute/virtualMachines",
         "name": "ARMDC01",
         "apiVersion": "2015-06-15",
         "location": "[resourceGroup().location]",
-        "dependsOn": [],
+        "dependsOn": 
+            [
+            "[resourceId('Microsoft.Storage/storageAccounts', 'storage-arm-sa')]",
+            "[resourceId('Microsoft.Network/networkInterfaces', 'ARMDC01-pip')]"
+            ],
         "properties": 
         {
-            "hardwareProfile": {"vmSize": "Standard_DS1_V2"},
+            "hardwareProfile": 
+                {
+                "vmSize": "Standard_DS1_V2"
+                },
+            "osProfile":
+                {
+                "computerName": "ARMDC01",
+                "adminUsername": "LocalAdmin",
+                "adminPassword": "[parameters('adminPassword')]"
+                },
             "storageProfile": 
-            {
+                {
                     "imageReference": 
                     {
-                        "MicrosoftWindowsServer",
+                        "publisher": "MicrosoftWindowsServer",
                         "offer": "WindowsServer",
                         "sku": "2012-R2-DataCenter",
                         "version": "latest"
@@ -28,13 +74,23 @@
                     {
                     "name": "osdisk",
                     "vhd": 
-                    {
-                    <need to imput value>    
-                    } ,
+                        {
+                        "uri": "[resourceId('Microsoft.Storage/storageAccounts', 'https://storage-arm-sa.blob.core.windows.net/vhds/ARMDC01-os-disk.vhd')]"
+                        },
                     "caching": "ReadWrite",
                     "createOption": "FromImage"   
                     }
-            }
+                },
+            "networkProfile":
+                {
+                "networkInterfaces":
+                    [
+                    {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', 'ARMDC01-pip')]"
+                    }
+                    ]
+                }
         }
-    }]
+     }
+  ]
 }
