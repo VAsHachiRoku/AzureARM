@@ -1,0 +1,54 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": 
+    {
+        
+    },
+    "variables": 
+    {
+        "virtualNetworkName": "iac-exdemo-vnet-01",
+        "addressPrefix": "192.168.0.0/16"
+    },
+    "resources": 
+    [
+        {
+        "type": "Microsoft.Network/virtualNetworks",
+        "name": "[variables('virtualNetworkName')]",
+        "apiVersion": "2016-03-30",
+        "location": "[resourceGroup().location]",
+        "properties": {
+            "addressSpace": {
+                            "addressPrefixes": ["[variables('addressPrefix')]"]
+                            },
+            "subnets": [
+                        {
+                        "name": "iac-exdemo-identity-rg",
+                        "properties": {
+                            "addressPrefix": "192.168.1.0/24"}
+                        },    
+                        {
+                        "name": "iac-exdemo-exchange-rg",
+                        "properties": {
+                            "addressPrefix": "192.168.2.0/24"}
+                        }
+                       ]
+                    }
+        },
+        {
+        "type": "Microsoft.Storage/storageAccounts",
+        "name": "iacexdemo",
+        "apiVersion": "2016-01-01",
+        "location": "[resourceGroup().location]",
+        "sku": 
+            {
+            "name": "Standard_LRS"
+            },
+        "kind": "Storage",
+        "properties": 
+            {
+                
+            }
+        }
+    ]
+}
